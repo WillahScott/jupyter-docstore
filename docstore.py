@@ -1,4 +1,5 @@
 from IPython.core.magic import Magics, magics_class, cell_magic, line_magic
+from IPython.display import Latex, display
 from pprint import pprint
 
 
@@ -6,7 +7,7 @@ DEFAULT_DOC = 'latex_from_ipynb.tex'
 
 
 @magics_class
-class DocumentSaver(Magics):
+class TexDocSaver(Magics):
 
     def __init__(self, shell=None,  **kwargs):
         super().__init__(shell=shell, **kwargs)
@@ -17,13 +18,25 @@ class DocumentSaver(Magics):
         shell.user_ns['__mystore'] = self._store
 
     @cell_magic
-    def save_to(self, line, cell):
+    def preview_tex(self, line, cell):
+        """store the cell in the store"""
+        print('This is just a preview, to store use `%%save_tex {doc_name}`')
+        # display LaTeX
+        print('=== LaTeX Preview ===')
+        display(Latex(cell))
+
+    @cell_magic
+    def save_tex(self, line, cell):
         """store the cell in the store"""
         # if no document was specified, save to DEFAULT_DOC
         texdoc = line if line != '' else DEFAULT_DOC
             
         print(f'Storing cell contents to document: {texdoc}')
         self._store[texdoc] = self._store.get(texdoc, []) + [cell]
+
+        # display LaTeX
+        print('=== LaTeX Preview ===')
+        display(Latex(cell))
 
         
     def _write(self, doc):
@@ -37,7 +50,7 @@ class DocumentSaver(Magics):
 
             
     @line_magic
-    def dump_doc(self, line):
+    def dump_tex(self, line):
         """Dump the cell content into the physical document"""
         if line != '':
             if line not in self._store:
